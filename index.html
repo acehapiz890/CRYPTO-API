@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Price Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+<br> <br> <br> <br> <br> <br> <br>
+  <h1 id="t" class="title1">Cryptocurrency Price Tracker API</h1>
+  <p id="t2" class="title1">Select a cryptocurrency to view its price in USD:</p>
+
+  <!-- Dropdown to choose cryptocurrency -->
+  <select id="crypto-select">
+    <option value="">Loading...</option> <!-- Initial placeholder -->
+  </select>
+  
+  <button onclick="getCryptoPrice()">Get Price</button>
+
+  <!-- Display cryptocurrency information here -->
+  <div id="crypto-info">
+    <p class="title1" id="crypto-name"><i class="fa-solid fa-bitcoin-sign"></i>  Select a cryptocurrency</p>
+    <p class="title1" id="crypto-price"></p>
+  </div>
+
+  <script>
+    // Fetch all cryptocurrencies and populate the dropdown
+    function loadCryptos() {
+      const url = 'https://api.coingecko.com/api/v3/coins/list';
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const select = document.getElementById('crypto-select');
+          
+          // Clear the "Loading..." placeholder
+          select.innerHTML = '';
+
+          // Add the default "Select a cryptocurrency" option
+          const defaultOption = document.createElement('option');
+          defaultOption.value = '';
+          defaultOption.textContent = 'Select a cryptocurrency';
+          select.appendChild(defaultOption);
+
+          // Add all available cryptocurrencies as options
+          data.forEach(coin => {
+            const option = document.createElement('option');
+            option.value = coin.id;
+            option.textContent = `${coin.name} (${coin.symbol.toUpperCase()})`;
+            select.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error loading cryptocurrencies:', error);
+          alert('Failed to load cryptocurrencies. Please try again later.');
+        });
+    }
+
+    // Function to fetch cryptocurrency data from CoinGecko API
+    function getCryptoPrice() {
+      const crypto = document.getElementById('crypto-select').value;
+      if (!crypto) {
+        alert('Please select a cryptocurrency!');
+        return;
+      }
+
+      const url = `https://api.coingecko.com/api/v3/simple/price?ids=${crypto}&vs_currencies=usd`;
+
+      // Fetch the data from CoinGecko
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const price = data[crypto].usd;
+          const name = crypto.charAt(0).toUpperCase() + crypto.slice(1);
+
+          // Update the UI with the price and cryptocurrency name
+          document.getElementById('crypto-name').innerText = `${name} Price:`;
+          document.getElementById('crypto-price').innerText = `$${price.toFixed(2)}`;
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Something went wrong. Please try again later.');
+        });
+    }
+
+    // Load cryptocurrencies when the page loads
+    window.onload = loadCryptos;
+  </script>
+
+</body>
+</html>
